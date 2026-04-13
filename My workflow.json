@@ -1,0 +1,297 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b91e37a2-a3dc-46e8-bac3-6e79249d71f6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.104.com.tw/jobs/search/api/jobs?keyword=暑期&area=6001006000&jobcat=2007001000&order=11&asc=0&jobsource=2018indexpoc&ro=0&kwop=7&page=1&mode=s&s9=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Referer",
+              "value": "https://www.104.com.tw/"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3a7a85ea-badb-4a1a-a56a-6e9ec6229900",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const jobs = $input.first().json.data || [];\n\nreturn jobs.map(job => ({\n  json: {\n    job_id: job.jobNo,\n    title: job.jobName,\n    company: job.custName,\n    location: job.jobAddrNoDesc,\n    salary: job.salaryDesc,\n    url: `https://www.104.com.tw/job/${job.jobNo}`\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b4f8a18e-bfee-4082-b722-9cc862e07c33",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hVOJHQHWGT08mPTjuXgRsvxKh_LrgdLbOo6nNj34nI0",
+          "mode": "list",
+          "cachedResultName": "未命名的試算表",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hVOJHQHWGT08mPTjuXgRsvxKh_LrgdLbOo6nNj34nI0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hVOJHQHWGT08mPTjuXgRsvxKh_LrgdLbOo6nNj34nI0/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2f8e69b9-2958-43e6-8ffc-5eb134ba8372",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VjEsL0t2Nql9zpvQ",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allJobs = $('Code in JavaScript').all().map(item => item.json);\n\nconst seenIds = new Set(\n  $('Get row(s) in sheet').all().map(item => item.json.job_id).filter(Boolean)\n);\n\nconst newJobs = allJobs.filter(job => !seenIds.has(job.job_id));\n\nif (newJobs.length === 0) return [];\n\nreturn newJobs.map(job => ({ json: job }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "5e416d69-7be7-402e-a083-562ac9bccf90",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "afe028e8-ec9f-44ef-94d0-9048723587fa",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "bf355cc8-7222-4dad-aaa0-d5822327a19c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=AIzaSyCXelCGNIC8ZSndjjgm2-tHdzL6cClRoiI",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"請用繁體中文，用2-3句話摘要這個實習職缺是否值得申請。職缺：職稱：{{ $json.title }}，公司：{{ $json.company }}，地點：{{ $json.location }}，薪資：{{ $json.salary }}。連結：{{ $json.url }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1104,
+        -96
+      ],
+      "id": "ad725450-290f-44e5-be88-be315a3cb5d6",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "sendTo": "davidlin.ulysses@gmail.com",
+        "subject": "=🔔 今日新實習職缺通知",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        -96
+      ],
+      "id": "581dc659-3a57-4def-8842-e92cd5c215cb",
+      "name": "Send a message",
+      "webhookId": "0b3e8373-5212-4469-8a29-d0f5b20645ca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "J9qWWpgtIP047r7Y",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst body = items.map((item, i) => {\n  const job = $('Code in JavaScript').all()[i].json;\n  const summary = item.json.candidates?.[0]?.content?.parts?.[0]?.text || '無摘要';\n  \n  return `${i + 1}. ${job.title} - ${job.company}\n📍 ${job.location} ｜ 💰 ${job.salary}\n🔗 ${job.url}\n💬 ${summary}\n${'─'.repeat(40)}`;\n}).join('\\n\\n');\n\nreturn [{ json: { body } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        -96
+      ],
+      "id": "f2433f0f-8352-4dad-be4a-5fe36259a8c8",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "74ff0347-d0ec-4099-baec-b8ed2a0f1a6e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2f3ea4b63fc0a8a9f2f3b1b693baf7c0b2edd4f6c85078e666b71efed254f5c1"
+  },
+  "id": "EXNThU08DAV9rRLy",
+  "tags": []
+}
