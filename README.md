@@ -88,6 +88,7 @@ Google Sheets (write) → 記錄已通知的職缺 ID
 
 ![工作流截圖](workflow.png)
 ![Email通知截圖](mail.png)
+<img src="mail.png" width="300"/>
 ## 📁 專案結構
 
 ```
