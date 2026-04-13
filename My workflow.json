@@ -139,7 +139,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=AIzaSyCXelCGNIC8ZSndjjgm2-tHdzL6cClRoiI",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=YOUR_GEMINI_API_KEY",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"請用繁體中文，用2-3句話摘要這個實習職缺是否值得申請。職缺：職稱：{{ $json.title }}，公司：{{ $json.company }}，地點：{{ $json.location }}，薪資：{{ $json.salary }}。連結：{{ $json.url }}\"\n    }]\n  }]\n}",
