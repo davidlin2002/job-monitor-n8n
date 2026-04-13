@@ -84,7 +84,10 @@ Google Sheets (write) → 記錄已通知的職缺 ID
 | `jobcat` | 職務類別代碼 | `2007001000`（資訊軟體系統類） |
 
 ---
+## 📸 成果展示
 
+![工作流截圖](workflow.png)
+![Email通知截圖](mail.png)
 ## 📁 專案結構
 
 ```
